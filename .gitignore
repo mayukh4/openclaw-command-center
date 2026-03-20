@@ -1,9 +1,62 @@
-node_modules/
+# ===========================================
+# OpenClaw Command Center - Secure .gitignore
+# ===========================================
+
+# Environment files (CRITICAL - contains secrets!)
 .env
-server/.env
-CLAUDE.md
-.claude/
-video-plan*.md
-server/cert.pem
-server/key.pem
+.env.local
+.env.production
+.env.*.local
+*.env
+
+# API Keys and secrets
+*api_key*
+*secret*
+*token*
+*.pem
+*.key
+*.crt
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencies
+node_modules/
+.npm
+
+# Build output
+dist/
+build/
+.cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Session data
+sessions/
+*.session
+
+# Uploads (if any)
+uploads/
