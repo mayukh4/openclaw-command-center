@@ -224,6 +224,35 @@ app.get('/api/health', rateLimit({ windowMs: 60000, maxRequests: 120 }), (req, r
   );
 });
 
+// UI config - agent display names, colors, voices
+app.get('/api/ui-config', rateLimit({ windowMs: 60000, maxRequests: 120 }), (req, res) => {
+  const defaults = {
+    agents: {
+      'main':   { name: 'Jansky', color: '#FFD700', voice: 'onyx'  },
+      'claw-1': { name: 'Orbit',  color: '#00DDFF', voice: 'echo'  },
+      'claw-2': { name: 'Nova',   color: '#AA66FF', voice: 'fable' },
+    },
+  };
+  const configPath = join(__dirname, '..', 'config', 'ui.json');
+  if (existsSync(configPath)) {
+    try {
+      const parsed = JSON.parse(readFileSync(configPath, 'utf8'));
+      // Merge: only override known agent IDs and known fields
+      for (const agentId of ['main', 'claw-1', 'claw-2']) {
+        if (parsed.agents?.[agentId]) {
+          const { name, color, voice } = parsed.agents[agentId];
+          if (name  && typeof name  === 'string') defaults.agents[agentId].name  = name;
+          if (color && typeof color === 'string') defaults.agents[agentId].color = color;
+          if (voice && typeof voice === 'string') defaults.agents[agentId].voice = voice;
+        }
+      }
+    } catch (err) {
+      console.warn('[ui-config] Failed to parse config/ui.json, using defaults:', err.message);
+    }
+  }
+  res.json(defaults);
+});
+
 // Local browser token - no API key needed, localhost only
 app.get('/api/auth/local-token', rateLimit({ windowMs: 60000, maxRequests: 30 }), (req, res) => {
   const ip = req.socket.remoteAddress;

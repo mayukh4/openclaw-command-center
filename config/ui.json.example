@@ -1,0 +1,19 @@
+{
+  "agents": {
+    "main": {
+      "name": "Jansky",
+      "color": "#FFD700",
+      "voice": "onyx"
+    },
+    "claw-1": {
+      "name": "Orbit",
+      "color": "#00DDFF",
+      "voice": "echo"
+    },
+    "claw-2": {
+      "name": "Nova",
+      "color": "#AA66FF",
+      "voice": "fable"
+    }
+  }
+}

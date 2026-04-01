@@ -93,18 +93,35 @@ let huddleTopicIndex = 0;
 
 // --- Init & Data Fetching ---
 
-export function init(canvasId) {
+export async function init(canvasId) {
   canvas = document.getElementById(canvasId);
   ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
   resize();
   window.addEventListener('resize', resize);
 
-  agents = [
-    createAgent('main', 0.50, 0.18, '#FFD700', 'Jansky', true),
-    createAgent('claw-1', 0.22, 0.48, '#00DDFF', 'Orbit', false),
-    createAgent('claw-2', 0.78, 0.48, '#AA66FF', 'Nova', false),
+  // Defaults — used immediately and overridden once config loads
+  const agentDefs = [
+    { id: 'main',   xPct: 0.50, yPct: 0.18, color: '#FFD700', name: 'Jansky', isBoss: true  },
+    { id: 'claw-1', xPct: 0.22, yPct: 0.48, color: '#00DDFF', name: 'Orbit',  isBoss: false },
+    { id: 'claw-2', xPct: 0.78, yPct: 0.48, color: '#AA66FF', name: 'Nova',   isBoss: false },
   ];
+
+  try {
+    const res = await fetch('/api/ui-config');
+    if (res.ok) {
+      const uiConfig = await res.json();
+      for (const def of agentDefs) {
+        const cfg = uiConfig.agents?.[def.id];
+        if (cfg?.name)  def.name  = cfg.name;
+        if (cfg?.color) def.color = cfg.color;
+      }
+    }
+  } catch (err) {
+    console.warn('[office] Failed to fetch /api/ui-config, using defaults:', err.message);
+  }
+
+  agents = agentDefs.map(d => createAgent(d.id, d.xPct, d.yPct, d.color, d.name, d.isBoss));
 
   fetchWeather();
   fetchHealth();

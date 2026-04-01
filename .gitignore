@@ -60,3 +60,6 @@ sessions/
 
 # Uploads (if any)
 uploads/
+
+# Claude Code
+CLAUDE.md
