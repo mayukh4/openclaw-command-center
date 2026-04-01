@@ -228,9 +228,9 @@ app.get('/api/health', rateLimit({ windowMs: 60000, maxRequests: 120 }), (req, r
 app.get('/api/ui-config', rateLimit({ windowMs: 60000, maxRequests: 120 }), (req, res) => {
   const defaults = {
     agents: {
-      'main':   { name: 'Jansky', color: '#FFD700', voice: 'onyx'  },
-      'claw-1': { name: 'Orbit',  color: '#00DDFF', voice: 'echo'  },
-      'claw-2': { name: 'Nova',   color: '#AA66FF', voice: 'fable' },
+      'main':   { name: 'Jansky', color: '#FFD700', hairColor: '#FFD700', clothColor: '#998100', voice: 'onyx'  },
+      'claw-1': { name: 'Orbit',  color: '#00DDFF', hairColor: '#00DDFF', clothColor: '#008499', voice: 'echo'  },
+      'claw-2': { name: 'Nova',   color: '#AA66FF', hairColor: '#AA66FF', clothColor: '#663D99', voice: 'fable' },
     },
   };
   const configPath = join(__dirname, '..', 'config', 'ui.json');
@@ -240,10 +240,12 @@ app.get('/api/ui-config', rateLimit({ windowMs: 60000, maxRequests: 120 }), (req
       // Merge: only override known agent IDs and known fields
       for (const agentId of ['main', 'claw-1', 'claw-2']) {
         if (parsed.agents?.[agentId]) {
-          const { name, color, voice } = parsed.agents[agentId];
-          if (name  && typeof name  === 'string') defaults.agents[agentId].name  = name;
-          if (color && typeof color === 'string') defaults.agents[agentId].color = color;
-          if (voice && typeof voice === 'string') defaults.agents[agentId].voice = voice;
+          const { name, color, hairColor, clothColor, voice } = parsed.agents[agentId];
+          if (name       && typeof name       === 'string') defaults.agents[agentId].name       = name;
+          if (color      && typeof color      === 'string') defaults.agents[agentId].color      = color;
+          if (hairColor  && typeof hairColor  === 'string') defaults.agents[agentId].hairColor  = hairColor;
+          if (clothColor && typeof clothColor === 'string') defaults.agents[agentId].clothColor = clothColor;
+          if (voice      && typeof voice      === 'string') defaults.agents[agentId].voice      = voice;
         }
       }
     } catch (err) {

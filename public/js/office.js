@@ -102,9 +102,9 @@ export async function init(canvasId) {
 
   // Defaults — used immediately and overridden once config loads
   const agentDefs = [
-    { id: 'main',   xPct: 0.50, yPct: 0.18, color: '#FFD700', name: 'Jansky', isBoss: true  },
-    { id: 'claw-1', xPct: 0.22, yPct: 0.48, color: '#00DDFF', name: 'Orbit',  isBoss: false },
-    { id: 'claw-2', xPct: 0.78, yPct: 0.48, color: '#AA66FF', name: 'Nova',   isBoss: false },
+    { id: 'main',   xPct: 0.50, yPct: 0.18, color: '#FFD700', hairColor: '#FFD700', clothColor: darken('#FFD700', 0.4), name: 'Jansky', isBoss: true  },
+    { id: 'claw-1', xPct: 0.22, yPct: 0.48, color: '#00DDFF', hairColor: '#00DDFF', clothColor: darken('#00DDFF', 0.4), name: 'Orbit',  isBoss: false },
+    { id: 'claw-2', xPct: 0.78, yPct: 0.48, color: '#AA66FF', hairColor: '#AA66FF', clothColor: darken('#AA66FF', 0.4), name: 'Nova',   isBoss: false },
   ];
 
   try {
@@ -113,15 +113,17 @@ export async function init(canvasId) {
       const uiConfig = await res.json();
       for (const def of agentDefs) {
         const cfg = uiConfig.agents?.[def.id];
-        if (cfg?.name)  def.name  = cfg.name;
-        if (cfg?.color) def.color = cfg.color;
+        if (cfg?.name)       def.name       = cfg.name;
+        if (cfg?.color)      def.color      = cfg.color;
+        if (cfg?.hairColor)  def.hairColor  = cfg.hairColor;
+        if (cfg?.clothColor) def.clothColor = cfg.clothColor;
       }
     }
   } catch (err) {
     console.warn('[office] Failed to fetch /api/ui-config, using defaults:', err.message);
   }
 
-  agents = agentDefs.map(d => createAgent(d.id, d.xPct, d.yPct, d.color, d.name, d.isBoss));
+  agents = agentDefs.map(d => createAgent(d.id, d.xPct, d.yPct, d.color, d.hairColor, d.clothColor, d.name, d.isBoss));
 
   fetchWeather();
   fetchHealth();
@@ -134,9 +136,9 @@ function resize() {
   canvas.height = rect.height - headerH;
 }
 
-function createAgent(id, xPct, yPct, color, label, isBoss) {
+function createAgent(id, xPct, yPct, color, hairColor, clothColor, label, isBoss) {
   return {
-    id, homeX: xPct, homeY: yPct, xPct, yPct, color, label, isBoss,
+    id, homeX: xPct, homeY: yPct, xPct, yPct, color, hairColor, clothColor, label, isBoss,
     state: 'idle', wanderState: 'at_desk', wanderTarget: null,
     wanderTimer: randomWanderDelay(), wanderIdleTimer: 0,
     stateTimer: 0, animFrame: 0, thoughtText: '', typingDots: 0,
@@ -825,7 +827,7 @@ function drawScreenContent(mx, my, w, h, agent) {
 
 function drawAgent(agent) {
   const x = Math.floor(canvas.width * agent.xPct), y = Math.floor(canvas.height * agent.yPct);
-  const t = tick / 1000, color = agent.color, dark = darken(color, 0.4);
+  const t = tick / 1000, color = agent.color, hairColor = agent.hairColor, clothColor = agent.clothColor;
   const ax = x, ay = y + PX * 5;
   const bob = agent.state === 'idle' ? Math.sin(t * 1.5) * PX * 0.3 : 0;
 
@@ -837,7 +839,7 @@ function drawAgent(agent) {
 
   ctx.fillStyle = '#D4A574';
   drawPixelPattern([' XX ','XXXX','XXXX',' XX '], ax - PX * 2, ay - PX * 6 + bob + headYOff, PX);
-  ctx.fillStyle = color;
+  ctx.fillStyle = hairColor;
   pixel(ax - PX, ay - PX * 7 + bob + headYOff, PX); pixel(ax, ay - PX * 7 + bob + headYOff, PX); pixel(ax + PX, ay - PX * 7 + bob + headYOff, PX);
   pixel(ax - PX * 2, ay - PX * 6 + bob + headYOff, PX); pixel(ax + PX * 2, ay - PX * 6 + bob + headYOff, PX);
   if (agent.isBoss) { ctx.fillStyle = '#FFD700'; pixel(ax, ay - PX * 8 + bob + headYOff, PX); }
@@ -847,7 +849,7 @@ function drawAgent(agent) {
   const eyeY = ay - PX * 5 + bob + headYOff + (agent.lookUp ? -PX * 0.3 : 0);
   pixel(ax - PX, eyeY, PX * 0.7); pixel(ax + PX, eyeY, PX * 0.7);
 
-  ctx.fillStyle = dark;
+  ctx.fillStyle = clothColor;
   drawPixelPattern([' XX ','XXXX','XXXX'], ax - PX * 2 + leanBack, ay - PX * 2 + bob, PX);
   ctx.fillStyle = '#D4A574';
   if (agent.state === 'working') {
@@ -874,26 +876,26 @@ function drawAgent(agent) {
 
 function drawWalkingAgent(agent) {
   const x = Math.floor(canvas.width * agent.xPct), y = Math.floor(canvas.height * agent.yPct);
-  const color = agent.color, dark = darken(color, 0.4);
+  const color = agent.color, hairColor = agent.hairColor, clothColor = agent.clothColor;
   const bounce = Math.abs(Math.sin(agent.walkPhase * 3)) * PX * 1.5;
   const legSwing = Math.sin(agent.walkPhase * 6);
   const ax = x, ay = y - bounce;
 
   ctx.fillStyle = '#D4A574';
   drawPixelPattern([' XX ','XXXX','XXXX',' XX '], ax - PX * 2, ay - PX * 8, PX);
-  ctx.fillStyle = color;
+  ctx.fillStyle = hairColor;
   pixel(ax - PX, ay - PX * 9, PX); pixel(ax, ay - PX * 9, PX); pixel(ax + PX, ay - PX * 9, PX);
   pixel(ax - PX * 2, ay - PX * 8, PX); pixel(ax + PX * 2, ay - PX * 8, PX);
   if (agent.isBoss) { ctx.fillStyle = '#FFD700'; pixel(ax, ay - PX * 10, PX); }
   ctx.fillStyle = '#111';
   const eO = agent.facingRight ? PX * 0.3 : -PX * 0.3;
   pixel(ax - PX + eO, ay - PX * 7, PX * 0.7); pixel(ax + PX + eO, ay - PX * 7, PX * 0.7);
-  ctx.fillStyle = dark;
+  ctx.fillStyle = clothColor;
   drawPixelPattern([' XX ','XXXX','XXXX'], ax - PX * 2, ay - PX * 4, PX);
   ctx.fillStyle = '#D4A574';
   const aS = Math.sin(agent.walkPhase * 6) * PX;
   pixel(ax - PX * 3, ay - PX * 3 + aS, PX); pixel(ax + PX * 2, ay - PX * 3 - aS, PX);
-  ctx.fillStyle = dark;
+  ctx.fillStyle = clothColor;
   const lx = ax - PX + legSwing * PX, rx = ax + legSwing * -PX;
   pixel(lx, ay - PX, PX); pixel(lx, ay, PX); pixel(rx, ay - PX, PX); pixel(rx, ay, PX);
   ctx.fillStyle = '#333'; pixel(lx, ay + PX, PX); pixel(rx, ay + PX, PX);

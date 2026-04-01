@@ -3,16 +3,22 @@
     "main": {
       "name": "Jansky",
       "color": "#FFD700",
+      "hairColor": "#FFD700",
+      "clothColor": "#998100",
       "voice": "onyx"
     },
     "claw-1": {
       "name": "Orbit",
       "color": "#00DDFF",
+      "hairColor": "#00DDFF",
+      "clothColor": "#008499",
       "voice": "echo"
     },
     "claw-2": {
       "name": "Nova",
       "color": "#AA66FF",
+      "hairColor": "#AA66FF",
+      "clothColor": "#663D99",
       "voice": "fable"
     }
   }
