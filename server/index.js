@@ -224,6 +224,16 @@ app.get('/api/health', rateLimit({ windowMs: 60000, maxRequests: 120 }), (req, r
   );
 });
 
+// Local browser token - no API key needed, localhost only
+app.get('/api/auth/local-token', rateLimit({ windowMs: 60000, maxRequests: 30 }), (req, res) => {
+  const ip = req.socket.remoteAddress;
+  if (ip !== '127.0.0.1' && ip !== '::1' && ip !== '::ffff:127.0.0.1') {
+    return res.status(403).json({ error: 'Local access only' });
+  }
+  const token = createSession('local-browser');
+  res.json({ token });
+});
+
 // ============================================
 // PROTECTED ENDPOINTS (require authentication)
 // ============================================

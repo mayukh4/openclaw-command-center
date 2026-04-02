@@ -7,6 +7,11 @@ let isRecording = false;
 let onTranscription = null; // callback(text)
 let silenceTimer = null;
 let targetAgent = 'main';
+let sessionToken = null;
+
+export function setToken(token) {
+  sessionToken = token;
+}
 
 const MAX_RECORD_SECONDS = 15;
 
@@ -96,6 +101,7 @@ async function sendToServer(blob) {
   try {
     const res = await fetch('/api/voice/transcribe', {
       method: 'POST',
+      headers: sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {},
       body: form,
     });
 
@@ -117,7 +123,10 @@ export async function playSpokenResponse(text, agentId = 'main') {
   try {
     const res = await fetch('/api/voice/speak', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
+      },
       body: JSON.stringify({ text, agent: agentId }),
     });
 

@@ -147,11 +147,24 @@ function connect() {
 
   ws = new WebSocket(url);
 
-  ws.onopen = () => {
+  ws.onopen = async () => {
     terminal.log('[ws] Connected to server', 'info');
     if (reconnectTimer) {
       clearTimeout(reconnectTimer);
       reconnectTimer = null;
+    }
+    try {
+      const resp = await fetch('/api/auth/local-token');
+      if (resp.ok) {
+        const { token } = await resp.json();
+        ws.send(JSON.stringify({ type: 'auth', token }));
+        voice.setToken(token);
+        office.setToken(token);
+      } else {
+        console.error('[ws] Failed to fetch local token:', resp.status);
+      }
+    } catch (err) {
+      console.error('[ws] Failed to fetch local token:', err);
     }
   };
 

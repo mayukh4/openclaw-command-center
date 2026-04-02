@@ -129,8 +129,19 @@ function createAgent(id, xPct, yPct, color, label, isBoss) {
 
 function randomWanderDelay() { return 8000 + Math.random() * 7000; }
 
+let sessionToken = null;
+
+export function setToken(token) {
+  sessionToken = token;
+}
+
 async function fetchWeather() {
-  try { const r = await fetch('/api/weather'); if (r.ok) weather = await r.json(); } catch (e) {}
+  try {
+    const r = await fetch('/api/weather', {
+      headers: sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {},
+    });
+    if (r.ok) weather = await r.json();
+  } catch (e) {}
 }
 async function fetchHealth() {
   try { const r = await fetch('/api/health'); if (r.ok) health = await r.json(); } catch (e) {}

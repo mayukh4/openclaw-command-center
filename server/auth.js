@@ -133,24 +133,25 @@ export function rateLimit(options = {}) {
  */
 export function requireAuth(req, res, next) {
   // Check header first
-  let apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
-  
+  let credential = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
+
   // Fallback to query parameter (less secure, use with caution)
-  if (!apiKey) {
-    apiKey = req.query.apiKey;
+  if (!credential) {
+    credential = req.query.apiKey;
   }
-  
-  if (!apiKey) {
+
+  if (!credential) {
     return res.status(401).json({ error: 'API key required' });
   }
-  
-  if (!isValidApiKey(apiKey)) {
+
+  // Accept either a valid API key or a valid session token
+  if (!isValidApiKey(credential) && !validateSession(credential)) {
     logSecurityEvent('invalid_api_key', { ip: req.ip, path: req.path });
     return res.status(403).json({ error: 'Invalid API key' });
   }
-  
+
   req.authenticated = true;
-  req.apiKey = apiKey;
+  req.apiKey = credential;
   next();
 }
 
